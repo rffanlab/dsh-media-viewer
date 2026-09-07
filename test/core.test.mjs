@@ -23,3 +23,12 @@ test('parses byte ranges', () => {
   assert.equal(parseRange(null, 1000), null)
   assert.equal(parseRange('bytes=1000-1100', 1000).invalid, true)
 })
+
+test('runtime document dependencies expose required APIs', async () => {
+  const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs')
+  assert.equal(typeof pdfjs.getDocument, 'function')
+
+  const mammothMod = await import('mammoth')
+  const mammoth = mammothMod.default || mammothMod
+  assert.equal(typeof mammoth.extractRawText, 'function')
+})

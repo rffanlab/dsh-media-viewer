@@ -1,0 +1,60 @@
+{
+  "name": "dsh-media-viewer",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "index.js",
+  "description": "DeepSeek Harness media and document viewer: video/audio/image playback, Markdown and text preview, PDF/DOCX preview support, copy-full-text and download.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rffanlab/dsh-media-viewer.git"
+  },
+  "homepage": "https://github.com/rffanlab/dsh-media-viewer#readme",
+  "bugs": {
+    "url": "https://github.com/rffanlab/dsh-media-viewer/issues"
+  },
+  "engines": {
+    "node": ">=20.3"
+  },
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "media",
+    "video",
+    "audio",
+    "markdown",
+    "pdf",
+    "docx",
+    "preview"
+  ],
+  "dependencies": {
+    "mammoth": "^1.12.2",
+    "pdfjs-dist": "4.10.38"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "scripts": {
+    "check": "node --check index.js && node --check client.js",
+    "test": "node --test test/*.test.mjs"
+  },
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web"
+    }
+  }
+}

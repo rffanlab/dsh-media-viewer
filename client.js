@@ -546,24 +546,22 @@ window.__ModuleLoader__.load({
       return m && isSupportedPath(m[1]) ? m[1] : null
     }
     function pathOfElement(el) {
-      var node = el
-      var depth = 0
-      while (node && depth < 7 && node !== document.body) {
-        if (node.closest && (node.closest('.mv-panel') || node.closest('.mv-page'))) return null
-        var values = []
-        if (node.getAttribute) {
-          ;['data-path','data-file-path','data-filename','data-file','data-uri','data-url','href','title','aria-label','data-tooltip'].forEach(function (name) {
-            var v = node.getAttribute(name); if (v) values.push(v)
-          })
-        }
-        if (node.href) values.push(node.href)
-        if (node.textContent) values.push(node.textContent)
-        for (var i = 0; i < values.length; i += 1) {
-          var found = cleanCandidate(values[i])
-          if (found) return found
-        }
-        node = node.parentElement
-        depth += 1
+      if (!el) return null
+      if (el.closest && (el.closest('.mv-panel') || el.closest('.mv-page'))) return null
+      var values = []
+      if (el.getAttribute) {
+        ;['data-path','data-file-path','data-filename','data-file','data-uri','data-url','href','title','aria-label','data-tooltip'].forEach(function (name) {
+          var v = el.getAttribute(name); if (v) values.push(v)
+        })
+      }
+      if (el.href) values.push(el.href)
+      // Important: inspect ONLY the clicked file element itself.
+      // Do not walk ancestor containers: authorization/confirm buttons can live
+      // inside tool cards whose parent text contains unrelated file paths.
+      if (el.textContent) values.push(el.textContent)
+      for (var i = 0; i < values.length; i += 1) {
+        var found = cleanCandidate(values[i])
+        if (found) return found
       }
       return null
     }
@@ -571,7 +569,20 @@ window.__ModuleLoader__.load({
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
       var t = e.target; if (!t || typeof t.closest !== 'function') return
       if (t.closest('.mv-panel') || t.closest('.mv-page')) return
-      var clickable = t.closest('button,a,code,[role="button"],[data-path],[data-file-path],[data-filename],[data-file],[data-uri],[data-url],[tabindex]')
+
+      // Inline Markdown code paths are handled explicitly and locally.
+      var code = t.closest('code')
+      if (code) {
+        var codePath = cleanCandidate(code.textContent || '')
+        if (codePath) {
+          e.preventDefault(); e.stopPropagation(); requestOpenPath(codePath)
+          return
+        }
+      }
+
+      // Only explicit clickable/file-bearing elements. Do NOT include generic
+      // [tabindex], and do not scan parents above the matched element.
+      var clickable = t.closest('a,button,[role="button"],[data-path],[data-file-path],[data-filename],[data-file],[data-uri],[data-url]')
       if (!clickable) return
       var path = pathOfElement(clickable); if (!path) return
       e.preventDefault(); e.stopPropagation(); requestOpenPath(path)

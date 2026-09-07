@@ -201,3 +201,11 @@ npm test
 ## License
 
 MIT
+
+
+## v0.2.1
+
+- 视频按原始宽高比自适应右侧停靠栏或浮动窗口，横屏/竖屏均使用 object-fit: contain，不会拉伸。
+- 聊天文件点击识别扩展到 button、a、role=button、常见 data-* 文件属性以及 tabindex 文件芯片。
+- 支持直接点击仅显示文件名的相对路径（例如 demo.mp4），由 DSH 按当前会话工作目录解析，不再要求路径文本包含斜杠。
+- 仍可按住 Ctrl/Cmd/Shift/Alt 点击以保留 DSH 原始打开行为。

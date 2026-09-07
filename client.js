@@ -1,4 +1,4 @@
-// dsh-media-viewer: DeepSeek Harness plugin (Client side) v0.2
+// dsh-media-viewer: DeepSeek Harness plugin (Client side) v0.2.1
 // Based on the DSH slot/panel integration patterns from dsh-md-preview.
 
 window.__ModuleLoader__.load({
@@ -27,7 +27,7 @@ window.__ModuleLoader__.load({
       '.mv-card-top{display:flex;gap:8px;align-items:center}.mv-icon{width:22px;flex:none;text-align:center}.mv-card-name{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}.mv-time{font-size:11px;opacity:.58;flex:none}.mv-path{font:10.5px ui-monospace,SFMono-Regular,Menlo,monospace;opacity:.55;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}.mv-snip{font-size:11px;opacity:.7;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:4px}.mv-meta{display:flex;gap:6px;align-items:center;margin-top:4px;flex-wrap:wrap}.mv-chip{font-size:10px;border:1px solid var(--dsw-alias-border-l2,#d0d7de);border-radius:999px;padding:1px 6px;opacity:.78}' +
       '.mv-empty,.mv-error{padding:18px 16px;opacity:.72}.mv-error{color:var(--dsw-alias-state-error-primary,#c0392b)}.mv-more{display:block;width:100%;text-align:left;padding:8px 16px;border:0;background:transparent;color:var(--dsw-alias-state-business-primary,#0969da);cursor:pointer}' +
       '.mv-view-head{display:flex;gap:8px;align-items:center;padding:8px 14px;border-bottom:1px solid var(--dsw-alias-border-l1,#d0d7de);flex:none}.mv-current{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;opacity:.7}' +
-      '.mv-body{flex:1;min-height:0;overflow:auto;padding:14px 16px}.mv-media-shell{height:100%;min-height:320px;display:flex;flex-direction:column;gap:8px}.mv-media-wrap{flex:1;min-height:260px;display:flex;align-items:center;justify-content:center;background:var(--dsw-alias-bg-layer-1,#f6f8fa);border-radius:8px;overflow:hidden;outline:none}.mv-video{width:100%;height:100%;max-height:100%;background:#000}.mv-audio{width:min(680px,92%)}.mv-image{max-width:100%;max-height:100%;object-fit:contain}.mv-pdf{width:100%;height:100%;min-height:560px;border:0;background:#fff}.mv-media-tools{display:flex;align-items:center;gap:8px;font-size:11px;opacity:.82;flex-wrap:wrap}.mv-media-hint{opacity:.62}' +
+      '.mv-body{flex:1;min-height:0;overflow:auto;padding:14px 16px}.mv-media-shell{height:100%;min-height:0;display:flex;flex-direction:column;gap:8px}.mv-media-wrap{width:100%;min-height:0;display:flex;align-items:center;justify-content:center;background:var(--dsw-alias-bg-layer-1,#f6f8fa);border-radius:8px;overflow:hidden;outline:none}.mv-video-wrap{flex:0 1 auto;width:100%;max-height:calc(100vh - 250px);background:#000}.mv-video{display:block;width:100%;height:100%;max-width:100%;max-height:calc(100vh - 250px);object-fit:contain;background:#000}.mv-audio-wrap{flex:1;min-height:180px}.mv-audio{width:min(680px,92%)}.mv-image{max-width:100%;max-height:100%;object-fit:contain}.mv-pdf{width:100%;height:100%;min-height:560px;border:0;background:#fff}.mv-media-tools{display:flex;align-items:center;gap:8px;font-size:11px;opacity:.82;flex-wrap:wrap}.mv-media-hint{opacity:.62}' +
       '.mv-pre{margin:0;white-space:pre-wrap;word-break:break-word;font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace}.mv-doc-note{font-size:11px;opacity:.65;margin-bottom:10px}.mv-copy-status{font-size:11px;opacity:.72}' +
       '.mv-render{line-height:1.62;word-wrap:break-word}.mv-render h1,.mv-render h2,.mv-render h3,.mv-render h4,.mv-render h5,.mv-render h6{margin:16px 0 8px;font-weight:600;line-height:1.3}.mv-render h1{font-size:20px;border-bottom:1px solid var(--dsw-alias-border-l1,#d0d7de);padding-bottom:6px}.mv-render h2{font-size:17px;border-bottom:1px solid var(--dsw-alias-border-l1,#d0d7de);padding-bottom:4px}.mv-render h3{font-size:15px}.mv-render p{margin:8px 0}.mv-render ul,.mv-render ol{margin:8px 0;padding-left:22px}.mv-render li{margin:3px 0}.mv-render code{background:var(--dsw-alias-markdown-inline-code,#f0f2f4);padding:1px 5px;border-radius:4px;font:12px ui-monospace,SFMono-Regular,Menlo,monospace}.mv-render pre.mv-code{background:var(--dsw-alias-markdown-code-block,#f6f8fa);border:1px solid var(--dsw-alias-border-l2,#d0d7de);border-radius:8px;padding:10px 12px;overflow:auto}.mv-render pre.mv-code code{background:transparent;padding:0;display:block}.mv-render table{border-collapse:collapse;display:block;overflow:auto;max-width:100%;margin:10px 0}.mv-render th,.mv-render td{border:1px solid var(--dsw-alias-border-l2,#d0d7de);padding:5px 9px;font-size:12px}.mv-render th{background:var(--dsw-alias-bg-module-platform,#f6f8fa)}.mv-render blockquote{margin:8px 0;padding:2px 12px;border-left:3px solid var(--dsw-alias-border-l2,#d0d7de);opacity:.8}.mv-render hr{border:0;border-top:1px solid var(--dsw-alias-border-l1,#d0d7de);margin:12px 0}.mv-render img{max-width:100%;height:auto}.mv-render a{color:var(--dsw-alias-state-business-primary,#0969da)}' +
       '.mv-sub-list{display:flex;flex-direction:column;gap:8px}.mv-sub-item{display:grid;grid-template-columns:110px 1fr;gap:10px;padding:8px 10px;border:1px solid var(--dsw-alias-border-l1,#d0d7de);border-radius:7px}.mv-sub-time{font:11px ui-monospace,SFMono-Regular,Menlo,monospace;opacity:.65}.mv-sub-text{white-space:pre-wrap;line-height:1.5}' +
@@ -227,7 +227,15 @@ window.__ModuleLoader__.load({
     function MediaPlayer(props) {
       var mediaRef = useRef(null)
       var rateState = useState(1); var rate = rateState[0]; var setRate = rateState[1]
+      var aspectState = useState('16 / 9'); var aspect = aspectState[0]; var setAspect = aspectState[1]
       useEffect(function () { if (mediaRef.current) mediaRef.current.playbackRate = rate }, [rate, props.src])
+      useEffect(function () { setAspect('16 / 9') }, [props.src])
+      function onMetadata() {
+        var m = mediaRef.current
+        if (!m || props.kind !== 'video') return
+        var w = Number(m.videoWidth || 0); var h = Number(m.videoHeight || 0)
+        if (w > 0 && h > 0) setAspect(w + ' / ' + h)
+      }
       function keyDown(e) {
         var m = mediaRef.current
         if (!m) return
@@ -235,17 +243,18 @@ window.__ModuleLoader__.load({
         else if (e.key === 'ArrowLeft' || e.key === 'j' || e.key === 'J') { e.preventDefault(); m.currentTime = Math.max(0, (m.currentTime || 0) - 5) }
         else if (e.key === 'ArrowRight' || e.key === 'l' || e.key === 'L') { e.preventDefault(); m.currentTime = Math.min(Number.isFinite(m.duration) ? m.duration : Infinity, (m.currentTime || 0) + 5) }
       }
-      var media = props.kind === 'video'
-        ? createElement('video', { ref: mediaRef, className: 'mv-video', controls: true, preload: 'metadata', src: props.src, playsInline: true })
+      var isVideo = props.kind === 'video'
+      var media = isVideo
+        ? createElement('video', { ref: mediaRef, className: 'mv-video', controls: true, preload: 'metadata', src: props.src, playsInline: true, onLoadedMetadata: onMetadata })
         : createElement('audio', { ref: mediaRef, className: 'mv-audio', controls: true, preload: 'metadata', src: props.src })
       return createElement('div', { className: 'mv-media-shell' },
-        createElement('div', { className: 'mv-media-wrap', tabIndex: 0, onKeyDown: keyDown, title: '点击后可用空格播放/暂停，←/→ 快退快进 5 秒' }, media),
+        createElement('div', { className: 'mv-media-wrap ' + (isVideo ? 'mv-video-wrap' : 'mv-audio-wrap'), style: isVideo ? { aspectRatio: aspect } : undefined, tabIndex: 0, onKeyDown: keyDown, title: '点击后可用空格播放/暂停，←/→ 快退快进 5 秒' }, media),
         createElement('div', { className: 'mv-media-tools' },
           createElement('span', null, '倍速'),
           createElement('select', { className: 'mv-select', value: String(rate), onChange: function (e) { setRate(Number(e.target.value) || 1) } },
             [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].map(function (x) { return createElement('option', { key: String(x), value: String(x) }, x + '×') })
           ),
-          createElement('span', { className: 'mv-media-hint' }, '点击播放器区域后：空格/K 播放暂停 · ←/J 后退5秒 · →/L 前进5秒')
+          createElement('span', { className: 'mv-media-hint' }, '视频会按原始宽高比自适应当前面板 · 空格/K 播放暂停 · ←/J 后退5秒 · →/L 前进5秒')
         )
       )
     }
@@ -510,18 +519,60 @@ window.__ModuleLoader__.load({
     }
 
     var PATH_RE = /\.(?:mp4|webm|mov|m4v|ogv|mkv|mp3|wav|ogg|oga|m4a|aac|flac|opus|png|jpe?g|gif|webp|avif|bmp|ico|svg|md|markdown|srt|vtt|ass|ssa|lrc|txt|log|jsonl?|ya?ml|toml|ini|conf|cfg|csv|tsv|xml|html?|css|scss|less|js|mjs|cjs|jsx|ts|tsx|py|java|kt|kts|c|h|cc|cpp|cxx|hpp|rs|go|rb|php|swift|sh|bash|zsh|fish|ps1|bat|cmd|sql|graphql|gql|env|properties|gradle|pdf|docx?|rtf|odt|xlsx?|ods|pptx?|odp)$/i
+    var PATH_TOKEN_RE = /([^\s<>"'`]+\.(?:mp4|webm|mov|m4v|ogv|mkv|mp3|wav|ogg|oga|m4a|aac|flac|opus|png|jpe?g|gif|webp|avif|bmp|ico|svg|md|markdown|srt|vtt|ass|ssa|lrc|txt|log|jsonl?|ya?ml|toml|ini|conf|cfg|csv|tsv|xml|html?|css|scss|less|js|mjs|cjs|jsx|ts|tsx|py|java|kt|kts|c|h|cc|cpp|cxx|hpp|rs|go|rb|php|swift|sh|bash|zsh|fish|ps1|bat|cmd|sql|graphql|gql|env|properties|gradle|pdf|docx?|rtf|odt|xlsx?|ods|pptx?|odp))/i
     function isSupportedPath(p) { return typeof p === 'string' && PATH_RE.test(p.trim()) }
-    function pathOfButton(btn) {
-      var p = btn.getAttribute ? (btn.getAttribute('title') || btn.getAttribute('aria-label') || '') : ''
-      p = p.replace(/^打开\s+/, '').trim(); if (isSupportedPath(p)) return p
-      var txt = (btn.textContent || '').trim(); if (isSupportedPath(txt) && (txt.indexOf('/') >= 0 || txt.indexOf('\\') >= 0)) return txt
+    function decodeCandidate(s) { try { return decodeURIComponent(s) } catch (e) { return s } }
+    function cleanCandidate(raw) {
+      if (raw === null || raw === undefined) return null
+      var s = decodeCandidate(String(raw)).trim()
+      if (!s) return null
+      try {
+        if (/^(?:https?|file|vscode):/i.test(s)) {
+          var u = new URL(s, window.location.href)
+          var qp = u.searchParams.get('path') || u.searchParams.get('file') || u.searchParams.get('filename')
+          if (qp && isSupportedPath(qp)) return qp
+          if (u.protocol === 'file:' || u.protocol === 'vscode:') {
+            var pn = decodeCandidate(u.pathname || '').replace(/^\/([A-Za-z]:[\\/])/, '$1')
+            if (isSupportedPath(pn)) return pn
+          }
+        }
+      } catch (e) {}
+      s = s.replace(/^["'`]+|["'`]+$/g, '')
+        .replace(/^(?:打开|查看|预览|下载|文件|open|view|preview|download|file)\s*(?:文件)?\s*[:：-]?\s*/i, '')
+        .trim()
+      if (isSupportedPath(s)) return s
+      var m = PATH_TOKEN_RE.exec(s)
+      return m && isSupportedPath(m[1]) ? m[1] : null
+    }
+    function pathOfElement(el) {
+      var node = el
+      var depth = 0
+      while (node && depth < 7 && node !== document.body) {
+        if (node.closest && (node.closest('.mv-panel') || node.closest('.mv-page'))) return null
+        var values = []
+        if (node.getAttribute) {
+          ;['data-path','data-file-path','data-filename','data-file','data-uri','data-url','href','title','aria-label','data-tooltip'].forEach(function (name) {
+            var v = node.getAttribute(name); if (v) values.push(v)
+          })
+        }
+        if (node.href) values.push(node.href)
+        if (node.textContent) values.push(node.textContent)
+        for (var i = 0; i < values.length; i += 1) {
+          var found = cleanCandidate(values[i])
+          if (found) return found
+        }
+        node = node.parentElement
+        depth += 1
+      }
       return null
     }
     function onClickCapture(e) {
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
       var t = e.target; if (!t || typeof t.closest !== 'function') return
-      var btn = t.closest('button'); if (!btn || btn.closest('.mv-panel') || btn.closest('.mv-page')) return
-      var path = pathOfButton(btn); if (!path) return
+      if (t.closest('.mv-panel') || t.closest('.mv-page')) return
+      var clickable = t.closest('button,a,[role="button"],[data-path],[data-file-path],[data-filename],[data-file],[data-uri],[data-url],[tabindex]')
+      if (!clickable) return
+      var path = pathOfElement(clickable); if (!path) return
       e.preventDefault(); e.stopPropagation(); requestOpenPath(path)
     }
 

@@ -33,7 +33,8 @@ window.__ModuleLoader__.load({
       '.mv-sub-list{display:flex;flex-direction:column;gap:8px}.mv-sub-item{display:grid;grid-template-columns:110px 1fr;gap:10px;padding:8px 10px;border:1px solid var(--dsw-alias-border-l1,#d0d7de);border-radius:7px}.mv-sub-time{font:11px ui-monospace,SFMono-Regular,Menlo,monospace;opacity:.65}.mv-sub-text{white-space:pre-wrap;line-height:1.5}' +
       '.mv-sheet-tabs{display:flex;gap:6px;overflow:auto;padding-bottom:8px}.mv-sheet-tab{white-space:nowrap}.mv-sheet-wrap{overflow:auto;border:1px solid var(--dsw-alias-border-l1,#d0d7de);border-radius:7px;max-height:calc(100vh - 260px)}.mv-sheet{border-collapse:collapse;min-width:100%;font-size:11px}.mv-sheet th,.mv-sheet td{border:1px solid var(--dsw-alias-border-l1,#d0d7de);padding:4px 7px;white-space:pre-wrap;vertical-align:top;max-width:360px;word-break:break-word}.mv-sheet th{position:sticky;top:0;background:var(--dsw-alias-bg-module-platform,#f6f8fa);z-index:2}.mv-sheet .mv-rowno{position:sticky;left:0;background:var(--dsw-alias-bg-module-platform,#f6f8fa);z-index:1;text-align:right;opacity:.7;min-width:36px}.mv-sheet th.mv-rowno{z-index:3}.mv-struct-note{font-size:11px;opacity:.65;margin:7px 0}' +
       '.mv-ppt-tools{display:flex;gap:8px;align-items:center;margin-bottom:10px}.mv-ppt-count{font-size:11px;opacity:.65}.mv-slide{aspect-ratio:16/9;border:1px solid var(--dsw-alias-border-l2,#d0d7de);border-radius:9px;background:var(--dsw-alias-bg-layer-1,#fff);box-shadow:0 3px 14px rgba(0,0,0,.08);padding:5% 6%;overflow:auto;display:flex;flex-direction:column;gap:12px}.mv-slide-title{font-size:22px;font-weight:650;line-height:1.25}.mv-slide-lines{display:flex;flex-direction:column;gap:8px;font-size:14px;line-height:1.45}.mv-slide-line{white-space:pre-wrap}.mv-slide-no{text-align:right;font-size:10px;opacity:.55;margin-top:6px}' +
-      '.mv-page{height:100%;min-height:480px;display:flex;flex-direction:column;overflow:hidden}.mv-page-title{padding:12px 16px;font-weight:600;border-bottom:1px solid var(--dsw-alias-border-l1,#d0d7de)}'
+      '.mv-page{height:100%;min-height:480px;display:flex;flex-direction:column;overflow:hidden}.mv-page-title{padding:12px 16px;font-weight:600;border-bottom:1px solid var(--dsw-alias-border-l1,#d0d7de)}' +
+      '.mv-chat-file-code{cursor:pointer!important;text-decoration:underline dotted;text-underline-offset:2px}'
 
     function esc(s) {
       return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
@@ -570,16 +571,34 @@ window.__ModuleLoader__.load({
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
       var t = e.target; if (!t || typeof t.closest !== 'function') return
       if (t.closest('.mv-panel') || t.closest('.mv-page')) return
-      var clickable = t.closest('button,a,[role="button"],[data-path],[data-file-path],[data-filename],[data-file],[data-uri],[data-url],[tabindex]')
+      var clickable = t.closest('button,a,code,[role="button"],[data-path],[data-file-path],[data-filename],[data-file],[data-uri],[data-url],[tabindex]')
       if (!clickable) return
       var path = pathOfElement(clickable); if (!path) return
       e.preventDefault(); e.stopPropagation(); requestOpenPath(path)
+    }
+    function onPointerOverCapture(e) {
+      var t = e.target; if (!t || typeof t.closest !== 'function') return
+      if (t.closest('.mv-panel') || t.closest('.mv-page')) return
+      var code = t.closest('code')
+      if (!code) return
+      var path = cleanCandidate(code.textContent || '')
+      if (!path) return
+      try {
+        code.classList.add('mv-chat-file-code')
+        code.setAttribute('title', '点击用媒体查看器打开：' + path)
+      } catch (err) {}
     }
 
     exports.inject = ['slots', 'layout']
     exports.apply = function (ctx) {
       var disposeClick = null
-      try { document.addEventListener('click', onClickCapture, true); disposeClick = function () { document.removeEventListener('click', onClickCapture, true) } } catch (e) {}
+      var disposeHover = null
+      try {
+        document.addEventListener('click', onClickCapture, true)
+        document.addEventListener('pointerover', onPointerOverCapture, true)
+        disposeClick = function () { document.removeEventListener('click', onClickCapture, true) }
+        disposeHover = function () { document.removeEventListener('pointerover', onPointerOverCapture, true) }
+      } catch (e) {}
       ctx.inject(['slots', 'layout'], function (scope) {
         layoutSvc = scope.layout || null
         scope.slots.inject('conversation.session.header.actions', function () {
@@ -592,7 +611,7 @@ window.__ModuleLoader__.load({
           return scope.slots.register({ name: 'conversation.view', id: 'media-viewer-view', order: 20, label: '媒体查看', inject: function (sessionId) { return sessionId ? { sessionId: sessionId } : {} } }, wrap(ViewPage))
         })
       })
-      return function () { if (disposeClick) disposeClick() }
+      return function () { if (disposeClick) disposeClick(); if (disposeHover) disposeHover() }
     }
 
     return module.exports

@@ -1,6 +1,6 @@
 {
   "name": "dsh-media-viewer",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "type": "module",
   "main": "index.js",
   "description": "DeepSeek Harness unified media/document viewer: video/audio playback, Markdown/text/PDF/DOCX, XLSX/PPTX structured preview, subtitles, copy-full-text and download.",

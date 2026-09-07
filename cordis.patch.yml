@@ -1,0 +1,4 @@
+# dsh-media-viewer bundle patch
+- insert:
+    - id: media-viewer
+      name: 'dsh-media-viewer'

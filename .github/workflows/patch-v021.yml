@@ -1,0 +1,35 @@
+name: Apply v0.2.1 patch
+
+on:
+  push:
+    paths:
+      - scripts/patch-v021.mjs
+      - .github/workflows/patch-v021.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply patch
+        run: node scripts/patch-v021.mjs
+      - name: Syntax check
+        run: node --check client.js
+      - name: Commit patch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add client.js package.json README.md
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "fix: responsive video and direct chat file opening"
+          git push

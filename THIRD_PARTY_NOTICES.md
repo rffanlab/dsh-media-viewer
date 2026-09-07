@@ -16,3 +16,5 @@ Runtime dependencies keep their own licenses:
 
 - Mammoth (`mammoth`) — BSD-2-Clause
 - PDF.js distribution (`pdfjs-dist`) — Apache-2.0
+- ExcelJS (`exceljs`) — MIT
+- JSZip (`jszip`) — dual licensed; this project uses it under the MIT option

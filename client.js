@@ -1,4 +1,4 @@
-// dsh-media-viewer: DeepSeek Harness plugin (Client side) v0.2.1
+// dsh-media-viewer: DeepSeek Harness plugin (Client side) v0.2.4
 // Based on the DSH slot/panel integration patterns from dsh-md-preview.
 
 window.__ModuleLoader__.load({
@@ -156,7 +156,15 @@ window.__ModuleLoader__.load({
       })
     }
     function triggerDownload(path, sid) {
-      var a = document.createElement('a'); a.href = contentUrl(path, sid, true); a.download = String(path).split(/[\\/]/).pop() || 'download'; a.rel = 'noopener'; document.body.appendChild(a); a.click(); a.remove()
+      var a = document.createElement('a')
+      a.href = contentUrl(path, sid, true)
+      a.download = String(path).split(/[\\/]/).pop() || 'download'
+      a.rel = 'noopener'
+      a.setAttribute('data-mv-download', '1')
+      a.style.display = 'none'
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
     }
 
     var open = false
@@ -527,9 +535,11 @@ window.__ModuleLoader__.load({
       if (raw === null || raw === undefined) return null
       var s = decodeCandidate(String(raw)).trim()
       if (!s) return null
+      if (/^\/media-viewer\/api\//i.test(s)) return null
       try {
         if (/^(?:https?|file|vscode):/i.test(s)) {
           var u = new URL(s, window.location.href)
+          if ((u.protocol === 'http:' || u.protocol === 'https:') && u.origin === window.location.origin && /^\/media-viewer\/api\//i.test(u.pathname)) return null
           var qp = u.searchParams.get('path') || u.searchParams.get('file') || u.searchParams.get('filename')
           if (qp && isSupportedPath(qp)) return qp
           if (u.protocol === 'file:' || u.protocol === 'vscode:') {
@@ -569,6 +579,10 @@ window.__ModuleLoader__.load({
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
       var t = e.target; if (!t || typeof t.closest !== 'function') return
       if (t.closest('.mv-panel') || t.closest('.mv-page')) return
+      // Explicit download links must keep their native browser behavior. In
+      // particular, triggerDownload() creates a temporary <a download>; without
+      // this guard the global file click interceptor re-opens its API URL.
+      if (t.closest('a[download],[data-mv-download="1"]')) return
 
       // Inline Markdown code paths are handled explicitly and locally.
       var code = t.closest('code')

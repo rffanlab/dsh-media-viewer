@@ -42,6 +42,7 @@
     "client.js",
     "cordis.patch.yml",
     "README.md",
+    "README.en.md",
     "LICENSE",
     "THIRD_PARTY_NOTICES.md"
   ],

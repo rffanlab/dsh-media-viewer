@@ -1,9 +1,9 @@
 {
   "name": "dsh-media-viewer",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "main": "index.js",
-  "description": "DeepSeek Harness media and document viewer: video/audio/image playback, Markdown and text preview, PDF/DOCX preview support, copy-full-text and download.",
+  "description": "DeepSeek Harness unified media/document viewer: video/audio playback, Markdown/text/PDF/DOCX, XLSX/PPTX structured preview, subtitles, copy-full-text and download.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -26,11 +26,16 @@
     "markdown",
     "pdf",
     "docx",
-    "preview"
+    "preview",
+    "xlsx",
+    "pptx",
+    "subtitle"
   ],
   "dependencies": {
     "mammoth": "^1.12.2",
-    "pdfjs-dist": "4.10.38"
+    "pdfjs-dist": "4.10.38",
+    "exceljs": "4.4.0",
+    "jszip": "3.10.1"
   },
   "files": [
     "index.js",

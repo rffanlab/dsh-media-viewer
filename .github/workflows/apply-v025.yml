@@ -1,0 +1,34 @@
+name: Apply v0.2.5 relative-path fix
+
+on:
+  push:
+    paths:
+      - scripts/apply-v025.py
+      - .github/workflows/apply-v025.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply patch
+        run: python scripts/apply-v025.py
+      - name: Install dependencies
+        run: npm install
+      - name: Syntax check
+        run: npm run check
+      - name: Unit tests
+        run: npm test
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.js test/core.test.mjs package.json README.md README.en.md package-lock.json
+          git commit -m "fix: resolve project-prefixed relative deliverable paths"
+          git push

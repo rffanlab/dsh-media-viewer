@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { classifyPath, mimeOf, parseRange, decodeXmlText, extractPptxTextRuns } from '../index.js'
+import { classifyPath, mimeOf, parseRange, decodeXmlText, extractPptxTextRuns, redundantProjectPrefixParentCwd } from '../index.js'
 
 test('classifies core file types', () => {
   assert.equal(classifyPath('/tmp/demo.mp4').kind, 'video')
@@ -43,6 +43,20 @@ test('decodes and extracts PPTX text runs', () => {
     extractPptxTextRuns('<p:sp><a:t>Hello &amp; world</a:t><a:r><a:t>Second</a:t></a:r></p:sp>'),
     ['Hello & world', 'Second']
   )
+})
+
+test('detects only redundant project-prefix relative paths', () => {
+  assert.equal(
+    redundantProjectPrefixParentCwd('mini-m3-sop-test/narration.md', '/srv/workspace/mini-m3-sop-test'),
+    '/srv/workspace'
+  )
+  assert.equal(
+    redundantProjectPrefixParentCwd('./mini-m3-sop-test/narration.md', '/srv/workspace/mini-m3-sop-test'),
+    '/srv/workspace'
+  )
+  assert.equal(redundantProjectPrefixParentCwd('narration.md', '/srv/workspace/mini-m3-sop-test'), undefined)
+  assert.equal(redundantProjectPrefixParentCwd('other-project/narration.md', '/srv/workspace/mini-m3-sop-test'), undefined)
+  assert.equal(redundantProjectPrefixParentCwd('/srv/workspace/mini-m3-sop-test/narration.md', '/srv/workspace/mini-m3-sop-test'), undefined)
 })
 
 test('runtime document dependencies import on Node 20+', async () => {

@@ -3,7 +3,7 @@
 
 import { createReadStream } from 'node:fs'
 import { readFile, stat as diskStat } from 'node:fs/promises'
-import { basename, extname } from 'node:path'
+import { basename, dirname, extname, isAbsolute } from 'node:path'
 
 export const name = 'media-viewer'
 export const inject = ['fs']
@@ -134,6 +134,23 @@ function sessionIdOf(exec) {
 
 function safeFilename(value) {
   return basename(String(value || 'download')).replace(/[\r\n\0"]/g, '_') || 'download'
+}
+
+/**
+ * Some DSH deliverable cards expose paths relative to the workspace parent
+ * (for example `project/file.md`) even when the session cwd is already
+ * `/.../project`. In that case resolving against cwd would duplicate the
+ * project segment. Return the cwd parent only for this exact redundant-prefix
+ * shape; every other relative path keeps normal session-cwd semantics.
+ */
+export function redundantProjectPrefixParentCwd(requestedPath, cwd) {
+  if (typeof requestedPath !== 'string' || typeof cwd !== 'string' || !requestedPath || !cwd) return undefined
+  if (isAbsolute(requestedPath)) return undefined
+  const normalized = requestedPath.replace(/\\/g, '/').replace(/^\.\/+/, '')
+  const first = normalized.split('/').filter(Boolean)[0]
+  const cwdBase = basename(cwd.replace(/[\\/]+$/, ''))
+  if (!first || !cwdBase || first !== cwdBase) return undefined
+  return dirname(cwd)
 }
 
 function contentDisposition(filename, attachment) {
@@ -367,8 +384,28 @@ export function apply(ctx) {
 
   async function resolveTarget(path, sessionId) {
     const cwd = cwdOf(sessionId)
-    const target = await ctx.fs.resolve(path, cwd ? { cwd } : {})
-    let display = String(path)
+    const requested = String(path)
+    let target = await ctx.fs.resolve(requested, cwd ? { cwd } : {})
+
+    // Normal DSH semantics are always session-cwd first. Only if that target
+    // does not exist do we consider the deliverable-card compatibility case
+    // where the relative path redundantly starts with basename(cwd).
+    if (cwd && !isAbsolute(requested)) {
+      let exists = false
+      try { exists = Boolean(await ctx.fs.stat(target)) } catch {}
+      if (!exists) {
+        const parentCwd = redundantProjectPrefixParentCwd(requested, cwd)
+        if (parentCwd) {
+          try {
+            const fallback = await ctx.fs.resolve(requested, { cwd: parentCwd })
+            const fallbackInfo = await ctx.fs.stat(fallback)
+            if (fallbackInfo) target = fallback
+          } catch {}
+        }
+      }
+    }
+
+    let display = requested
     try { display = ctx.fs.processPath(target) } catch {}
     return { target, display, cwd }
   }
@@ -610,4 +647,4 @@ export function apply(ctx) {
   })
 }
 
-export const _test = { classifyPath, mimeOf, parseRange, decodeXmlText, extractPptxTextRuns }
+export const _test = { classifyPath, mimeOf, parseRange, decodeXmlText, extractPptxTextRuns, redundantProjectPrefixParentCwd }

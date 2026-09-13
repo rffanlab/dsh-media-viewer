@@ -211,6 +211,13 @@ Tests cover:
 
 ## Changelog
 
+### v0.2.5
+
+- Fix `file not found` when DSH deliverable cards expose project-prefixed relative paths such as `project/file.md`
+- Relative paths still resolve against the session cwd first; fallback to the cwd parent happens only when the first path segment exactly matches the cwd basename and the normal target is absent
+- Supports both `narration.md` and `mini-m3-sop-test/narration.md` without duplicating the project directory
+
+
 ### v0.2.3
 
 - Fixed a serious regression where authorization / confirmation buttons could be hijacked if a parent tool-card container also contained a recognized file path

@@ -1,4 +1,4 @@
-// dsh-media-viewer: DeepSeek Harness plugin (Client side) v0.2.4
+// dsh-media-viewer: DeepSeek Harness plugin (Client side) v0.2.6
 // Based on the DSH slot/panel integration patterns from dsh-md-preview.
 
 window.__ModuleLoader__.load({
@@ -179,7 +179,7 @@ window.__ModuleLoader__.load({
     function subscribe(f) { listeners.add(f); return function () { listeners.delete(f) } }
     function setOpen(v) { if (open === v) return; open = v; notify(); emit('dsh-media-viewer-open', v) }
     function setDocked(v) { if (docked === v) return; docked = v; notify(); emit('dsh-media-viewer-dock', v) }
-    function requestOpenPath(path) { pendingSeq += 1; pending = { path: String(path), seq: pendingSeq }; setDocked(true); setOpen(true); notify(); emit('dsh-media-viewer-path', pending) }
+    function requestOpenPath(path) { pendingSeq += 1; pending = { path: sanitizePathInput(path), seq: pendingSeq }; setDocked(true); setOpen(true); notify(); emit('dsh-media-viewer-path', pending) }
     function setSession(sid) { if (currentSessionId === sid) return; currentSessionId = sid; notify(); emit('dsh-media-viewer-session', sid) }
     function useExternal(read, eventName) {
       var s = useState(read()); var v = s[0]; var setV = s[1]
@@ -436,6 +436,7 @@ window.__ModuleLoader__.load({
       function openPath(path) {
         if (!path) return
         setBusy(true); setStatus('')
+        path = sanitizePathInput(path)
         apiMeta(path, sid).then(function (r) { setBusy(false); if (r && r.ok) setSelected(r); else setSelected({ path: String(path), error: r && r.error ? r.error : '打开失败' }) }).catch(function (e) { setBusy(false); setSelected({ path: String(path), error: String(e && e.message ? e.message : e) }) })
       }
       useEffect(function () { setFiles([]); setSelected(null); setExpanded(false); fetchList() }, [sid])
@@ -529,11 +530,22 @@ window.__ModuleLoader__.load({
 
     var PATH_RE = /\.(?:mp4|webm|mov|m4v|ogv|mkv|mp3|wav|ogg|oga|m4a|aac|flac|opus|png|jpe?g|gif|webp|avif|bmp|ico|svg|md|markdown|srt|vtt|ass|ssa|lrc|txt|log|jsonl?|ya?ml|toml|ini|conf|cfg|csv|tsv|xml|html?|css|scss|less|js|mjs|cjs|jsx|ts|tsx|py|java|kt|kts|c|h|cc|cpp|cxx|hpp|rs|go|rb|php|swift|sh|bash|zsh|fish|ps1|bat|cmd|sql|graphql|gql|env|properties|gradle|pdf|docx?|rtf|odt|xlsx?|ods|pptx?|odp)$/i
     var PATH_TOKEN_RE = /([^\s<>"'`]+\.(?:mp4|webm|mov|m4v|ogv|mkv|mp3|wav|ogg|oga|m4a|aac|flac|opus|png|jpe?g|gif|webp|avif|bmp|ico|svg|md|markdown|srt|vtt|ass|ssa|lrc|txt|log|jsonl?|ya?ml|toml|ini|conf|cfg|csv|tsv|xml|html?|css|scss|less|js|mjs|cjs|jsx|ts|tsx|py|java|kt|kts|c|h|cc|cpp|cxx|hpp|rs|go|rb|php|swift|sh|bash|zsh|fish|ps1|bat|cmd|sql|graphql|gql|env|properties|gradle|pdf|docx?|rtf|odt|xlsx?|ods|pptx?|odp))/i
-    function isSupportedPath(p) { return typeof p === 'string' && PATH_RE.test(p.trim()) }
+    var PATH_EDGE_JUNK_RE = /^[\s\u00A0\u1680\u180E\u2000-\u200F\u2028-\u202F\u205F\u2060-\u206F\u3000\uFEFF]+|[\s\u00A0\u1680\u180E\u2000-\u200F\u2028-\u202F\u205F\u2060-\u206F\u3000\uFEFF]+$/g
+    var PATH_FORMAT_JUNK_AFTER_RE = /([/\\])[\u00AD\u061C\u180E\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFEFF]+/g
+    var PATH_FORMAT_JUNK_BEFORE_RE = /[\u00AD\u061C\u180E\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFEFF]+(?=[/\\])/g
+    function sanitizePathInput(value) {
+      var s = String(value === null || value === undefined ? '' : value).replace(PATH_EDGE_JUNK_RE, '')
+      s = s.replace(/([/\\])[ \t\f\v]*\r?\n[ \t\f\v]*/g, '$1')
+      s = s.replace(/[ \t\f\v]*\r?\n[ \t\f\v]*(?=[/\\])/g, '')
+      s = s.replace(PATH_FORMAT_JUNK_AFTER_RE, '$1').replace(PATH_FORMAT_JUNK_BEFORE_RE, '')
+      s = s.replace(/([/\\])[ \t]+(?=\.dsh-runs(?:[/\\]|$))/g, '$1')
+      return s.replace(PATH_EDGE_JUNK_RE, '')
+    }
+    function isSupportedPath(p) { return typeof p === 'string' && PATH_RE.test(sanitizePathInput(p)) }
     function decodeCandidate(s) { try { return decodeURIComponent(s) } catch (e) { return s } }
     function cleanCandidate(raw) {
       if (raw === null || raw === undefined) return null
-      var s = decodeCandidate(String(raw)).trim()
+      var s = sanitizePathInput(decodeCandidate(String(raw)))
       if (!s) return null
       if (/^\/media-viewer\/api\//i.test(s)) return null
       try {
@@ -541,16 +553,15 @@ window.__ModuleLoader__.load({
           var u = new URL(s, window.location.href)
           if ((u.protocol === 'http:' || u.protocol === 'https:') && u.origin === window.location.origin && /^\/media-viewer\/api\//i.test(u.pathname)) return null
           var qp = u.searchParams.get('path') || u.searchParams.get('file') || u.searchParams.get('filename')
-          if (qp && isSupportedPath(qp)) return qp
+          if (qp && isSupportedPath(qp)) return sanitizePathInput(qp)
           if (u.protocol === 'file:' || u.protocol === 'vscode:') {
-            var pn = decodeCandidate(u.pathname || '').replace(/^\/([A-Za-z]:[\\/])/, '$1')
+            var pn = sanitizePathInput(decodeCandidate(u.pathname || '').replace(/^\/([A-Za-z]:[\\/])/, '$1'))
             if (isSupportedPath(pn)) return pn
           }
         }
       } catch (e) {}
-      s = s.replace(/^["'`]+|["'`]+$/g, '')
-        .replace(/^(?:打开|查看|预览|下载|文件|open|view|preview|download|file)\s*(?:文件)?\s*[:：-]?\s*/i, '')
-        .trim()
+      s = sanitizePathInput(s.replace(/^["'`]+|["'`]+$/g, '')
+        .replace(/^(?:打开|查看|预览|下载|文件|open|view|preview|download|file)\s*(?:文件)?\s*[:：-]?\s*/i, ''))
       if (isSupportedPath(s)) return s
       var m = PATH_TOKEN_RE.exec(s)
       return m && isSupportedPath(m[1]) ? m[1] : null

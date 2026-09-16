@@ -1,4 +1,4 @@
-// dsh-media-viewer: DeepSeek Harness plugin (Host side) v0.2
+// dsh-media-viewer: DeepSeek Harness plugin (Host side) v0.2.6
 // Unified media/document preview, structured Office preview, full-text copy, and downloads.
 
 import { createReadStream } from 'node:fs'
@@ -134,6 +134,34 @@ function sessionIdOf(exec) {
 
 function safeFilename(value) {
   return basename(String(value || 'download')).replace(/[\r\n\0"]/g, '_') || 'download'
+}
+
+// Unicode format/control characters that commonly leak into copied chat text
+// while remaining visually invisible. They are stripped only at path edges or
+// next to a separator, never from ordinary filename content.
+const PATH_EDGE_JUNK = /[\s\u00A0\u1680\u180E\u2000-\u200F\u2028-\u202F\u205F\u2060-\u206F\u3000\uFEFF]/
+const PATH_FORMAT_JUNK = /[\u00AD\u061C\u180E\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFEFF]/
+
+/**
+ * Remove chat/rendering artifacts from a path without deleting legitimate
+ * spaces inside filenames. This intentionally handles DSH's `.dsh-runs`
+ * hidden directory as a special case because spaces immediately before it are
+ * presentation artifacts, not part of the generated workspace path.
+ */
+export function sanitizePathInput(value) {
+  let s = String(value ?? '')
+  const edge = new RegExp(`^${PATH_EDGE_JUNK.source}+|${PATH_EDGE_JUNK.source}+$`, 'g')
+  s = s.replace(edge, '')
+  // A rendered/copy-wrapped path may continue on the next visual line.
+  s = s.replace(/([/\\])[ \t\f\v]*\r?\n[ \t\f\v]*/g, '$1')
+  s = s.replace(/[ \t\f\v]*\r?\n[ \t\f\v]*(?=[/\\])/g, '')
+  // Invisible formatting marks next to separators are never meaningful here.
+  const fmtAfter = new RegExp(`([/\\\\])${PATH_FORMAT_JUNK.source}+`, 'g')
+  const fmtBefore = new RegExp(`${PATH_FORMAT_JUNK.source}+(?=[/\\\\])`, 'g')
+  s = s.replace(fmtAfter, '$1').replace(fmtBefore, '')
+  // DSH-generated hidden run directory: tolerate UI-inserted horizontal space.
+  s = s.replace(/([/\\])[ \t]+(?=\.dsh-runs(?:[/\\]|$))/g, '$1')
+  return s.replace(edge, '')
 }
 
 /**
@@ -384,7 +412,7 @@ export function apply(ctx) {
 
   async function resolveTarget(path, sessionId) {
     const cwd = cwdOf(sessionId)
-    const requested = String(path)
+    const requested = sanitizePathInput(path)
     let target = await ctx.fs.resolve(requested, cwd ? { cwd } : {})
 
     // Normal DSH semantics are always session-cwd first. Only if that target
@@ -647,4 +675,4 @@ export function apply(ctx) {
   })
 }
 
-export const _test = { classifyPath, mimeOf, parseRange, decodeXmlText, extractPptxTextRuns, redundantProjectPrefixParentCwd }
+export const _test = { classifyPath, mimeOf, parseRange, decodeXmlText, extractPptxTextRuns, redundantProjectPrefixParentCwd, sanitizePathInput }

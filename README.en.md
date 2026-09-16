@@ -211,6 +211,15 @@ Tests cover:
 
 ## Changelog
 
+### v0.2.6
+
+- Tolerate invisible Unicode artifacts at copied/chat path boundaries (zero-width marks, BOM, bidi controls, etc.)
+- Repair line-wrapped paths where indentation appears after a separator
+- Normalize DSH run-directory artifacts such as `/  .dsh-runs` back to `/.dsh-runs`
+- Preserve legitimate spaces inside normal filenames such as `我的 视频/final version.mp4`
+- Apply sanitation both in the chat client and Host resolver so pasted paths are covered too
+
+
 ### v0.2.5
 
 - Fix `file not found` when DSH deliverable cards expose project-prefixed relative paths such as `project/file.md`

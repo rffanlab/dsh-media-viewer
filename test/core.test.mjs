@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { classifyPath, mimeOf, parseRange, decodeXmlText, extractPptxTextRuns, redundantProjectPrefixParentCwd } from '../index.js'
+import { classifyPath, mimeOf, parseRange, decodeXmlText, extractPptxTextRuns, redundantProjectPrefixParentCwd, sanitizePathInput } from '../index.js'
 
 test('classifies core file types', () => {
   assert.equal(classifyPath('/tmp/demo.mp4').kind, 'video')
@@ -57,6 +57,16 @@ test('detects only redundant project-prefix relative paths', () => {
   assert.equal(redundantProjectPrefixParentCwd('narration.md', '/srv/workspace/mini-m3-sop-test'), undefined)
   assert.equal(redundantProjectPrefixParentCwd('other-project/narration.md', '/srv/workspace/mini-m3-sop-test'), undefined)
   assert.equal(redundantProjectPrefixParentCwd('/srv/workspace/mini-m3-sop-test/narration.md', '/srv/workspace/mini-m3-sop-test'), undefined)
+})
+
+test('sanitizes chat path artifacts without deleting legitimate spaces', () => {
+  const base = '/srv/e5-data/deepseek-harness/workspace/道家文化主号短视频/'
+  const tail = '.dsh-runs/762b5b31-a1c9-48ed-994d-6f8abaee69be/final/zhuangzi-01-04-liezi-final-v3.mp4'
+  assert.equal(sanitizePathInput(base + '\n  ' + tail), base + tail)
+  assert.equal(sanitizePathInput(base + '  ' + tail), base + tail)
+  assert.equal(sanitizePathInput('\uFEFF\u200E' + base + tail + '\u200B\u2060'), base + tail)
+  assert.equal(sanitizePathInput('/srv/workspace/我的 视频/final version.mp4'), '/srv/workspace/我的 视频/final version.mp4')
+  assert.equal(sanitizePathInput('/srv/workspace/ normal name.mp4'), '/srv/workspace/ normal name.mp4')
 })
 
 test('runtime document dependencies import on Node 20+', async () => {

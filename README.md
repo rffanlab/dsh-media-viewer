@@ -213,6 +213,14 @@ npm test
 
 ## 更新记录
 
+### v0.2.7
+
+- 修复 DSH 新版显式交付卡片点击“打开”后路径被错误识别为 `在侧边栏打开 /.../file.mp4` 的问题
+- 针对官方 `[data-presented-file]` 卡片直接读取 `resolveWorkspacePath(cwd, file.path)` 写入的 canonical `title` 路径
+- 卡片正文和“打开”按钮由媒体查看器接管；右侧下拉菜单 (`aria-haspopup=menu`) 保持 DSH 原生行为
+- 防御性兼容中文 `在侧边栏打开 ...` aria-label，不再把界面提示语当作文件路径的一部分
+
+
 ### v0.2.6
 
 - 兼容聊天/复制路径中混入的首尾不可见 Unicode 字符（零宽空格、BOM、方向控制符等）

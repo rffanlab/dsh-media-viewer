@@ -211,6 +211,14 @@ Tests cover:
 
 ## Changelog
 
+### v0.2.7
+
+- Fix DSH explicit-delivery cards where the localized accessibility label could be mistaken for a path, e.g. `在侧边栏打开 /.../file.mp4`
+- For official `[data-presented-file]` cards, read the canonical `title` generated from `resolveWorkspacePath(cwd, file.path)` instead of parsing UI prose
+- Media preview handles the card body and Open button, while the chevron menu (`aria-haspopup=menu`) remains native DSH behavior
+- Defensively strip the Chinese `在侧边栏打开 ...` accessibility prefix when encountered elsewhere
+
+
 ### v0.2.6
 
 - Tolerate invisible Unicode artifacts at copied/chat path boundaries (zero-width marks, BOM, bidi controls, etc.)

@@ -1,4 +1,4 @@
-// dsh-media-viewer: DeepSeek Harness plugin (Client side) v0.2.6
+// dsh-media-viewer: DeepSeek Harness plugin (Client side) v0.2.7
 // Based on the DSH slot/panel integration patterns from dsh-md-preview.
 
 window.__ModuleLoader__.load({
@@ -561,7 +561,7 @@ window.__ModuleLoader__.load({
         }
       } catch (e) {}
       s = sanitizePathInput(s.replace(/^["'`]+|["'`]+$/g, '')
-        .replace(/^(?:打开|查看|预览|下载|文件|open|view|preview|download|file)\s*(?:文件)?\s*[:：-]?\s*/i, ''))
+        .replace(/^(?:在(?:右侧)?侧边栏(?:中)?\s*)?(?:打开|查看|预览|下载|文件|open|view|preview|download|file)\s*(?:文件)?\s*[:：-]?\s*/i, ''))
       if (isSupportedPath(s)) return s
       var m = PATH_TOKEN_RE.exec(s)
       return m && isSupportedPath(m[1]) ? m[1] : null
@@ -594,6 +594,24 @@ window.__ModuleLoader__.load({
       // particular, triggerDownload() creates a temporary <a download>; without
       // this guard the global file click interceptor re-opens its API URL.
       if (t.closest('a[download],[data-mv-download="1"]')) return
+
+      // DSH explicit-delivery cards expose two different strings: the visible
+      // Open button carries a localized aria-label such as "在侧边栏打开 …",
+      // while the card overlay button's title is the canonical path produced by
+      // resolveWorkspacePath(cwd, file.path). Prefer that canonical title
+      // instead of guessing a path from localized UI prose. Keep the chevron
+      // menu entirely owned by DSH.
+      var presentedCard = t.closest('[data-presented-file]')
+      if (presentedCard) {
+        var presentedButton = t.closest('button')
+        if (presentedButton && presentedButton.getAttribute('aria-haspopup') === 'menu') return
+        var canonicalButton = presentedCard.querySelector('button[title]')
+        var canonicalPath = canonicalButton ? cleanCandidate(canonicalButton.getAttribute('title')) : null
+        if (canonicalPath) {
+          e.preventDefault(); e.stopPropagation(); requestOpenPath(canonicalPath)
+        }
+        return
+      }
 
       // Inline Markdown code paths are handled explicitly and locally.
       var code = t.closest('code')

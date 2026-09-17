@@ -1,5 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import { readFile as readFixture } from 'node:fs/promises'
 import { classifyPath, mimeOf, parseRange, decodeXmlText, extractPptxTextRuns, redundantProjectPrefixParentCwd, sanitizePathInput } from '../index.js'
 
 test('classifies core file types', () => {
@@ -67,6 +68,14 @@ test('sanitizes chat path artifacts without deleting legitimate spaces', () => {
   assert.equal(sanitizePathInput('\uFEFF\u200E' + base + tail + '\u200B\u2060'), base + tail)
   assert.equal(sanitizePathInput('/srv/workspace/我的 视频/final version.mp4'), '/srv/workspace/我的 视频/final version.mp4')
   assert.equal(sanitizePathInput('/srv/workspace/ normal name.mp4'), '/srv/workspace/ normal name.mp4')
+})
+
+test('client prefers canonical DSH presented-card title paths', async () => {
+  const client = await readFixture(new URL('../client.js', import.meta.url), 'utf8')
+  assert.match(client, /closest\('\[data-presented-file\]'\)/)
+  assert.match(client, /querySelector\('button\[title\]'\)/)
+  assert.match(client, /getAttribute\('aria-haspopup'\) === 'menu'/)
+  assert.match(client, /在\(\?:右侧\)\?侧边栏/)
 })
 
 test('runtime document dependencies import on Node 20+', async () => {

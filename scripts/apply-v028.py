@@ -63,7 +63,7 @@ tp.write_text(t, encoding='utf-8')
 pkgp = Path('package.json')
 pkg = json.loads(pkgp.read_text(encoding='utf-8'))
 pkg['version'] = '0.2.8'
-pkgp.write_text(json.dumps(pkg, ensure_ascii=False, indent=2) + '\\n', encoding='utf-8')
+pkgp.write_text(json.dumps(pkg, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
 entries = [
     ('README.md', '## 更新记录', '''### v0.2.8
@@ -89,7 +89,7 @@ for filename, heading, body in entries:
     if '### v0.2.8' not in r:
         if heading not in r:
             raise SystemExit(f'{filename} changelog anchor not found')
-        r = r.replace(heading + '\\n', heading + '\\n\\n' + body, 1)
+        r = r.replace(heading + '\n', heading + '\n\n' + body, 1)
         rp.write_text(r, encoding='utf-8')
 
 print('v0.2.8 inline mention canonical path patch applied')

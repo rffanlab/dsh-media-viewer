@@ -213,6 +213,14 @@ npm test
 
 ## 更新记录
 
+### v0.2.8
+
+- 修复 DSH 正文行内文件提及只把 basename 传给媒体查看器的问题，例如完整文件实际位于 .dsh-runs/.../final/，插件却只收到 final.mp4
+- DSH 行内文件提及的 canonical 完整路径由内部 button[title] 提供；插件现在优先读取该 title
+- 仅当 code 是真正的裸代码路径、没有 DSH 文件按钮时，才退回使用 code 文本本身
+- 同时兼容 code 包 button 与 button 包 code 两种结构
+
+
 ### v0.2.7
 
 - 修复 DSH 新版显式交付卡片点击“打开”后路径被错误识别为 `在侧边栏打开 /.../file.mp4` 的问题

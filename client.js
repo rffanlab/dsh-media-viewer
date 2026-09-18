@@ -1,4 +1,4 @@
-// dsh-media-viewer: DeepSeek Harness plugin (Client side) v0.2.7
+// dsh-media-viewer: DeepSeek Harness plugin (Client side) v0.2.8
 // Based on the DSH slot/panel integration patterns from dsh-md-preview.
 
 window.__ModuleLoader__.load({
@@ -613,9 +613,20 @@ window.__ModuleLoader__.load({
         return
       }
 
-      // Inline Markdown code paths are handled explicitly and locally.
+      // DSH inline file mentions render as <code><button title="FULL_PATH">basename</button></code>
+      // (and explicit markdown file links can render as <button title="FULL_PATH"><code>...</code></button>).
+      // Prefer the owner's canonical title path before falling back to the authored code text,
+      // otherwise a unique-basename mention is incorrectly downgraded to just "file.mp4".
       var code = t.closest('code')
       if (code) {
+        var mentionButton = t.closest('button[title]') || code.querySelector('button[title]')
+        if (mentionButton && (code.contains(mentionButton) || mentionButton.contains(code))) {
+          var mentionPath = cleanCandidate(mentionButton.getAttribute('title') || '')
+          if (mentionPath) {
+            e.preventDefault(); e.stopPropagation(); requestOpenPath(mentionPath)
+            return
+          }
+        }
         var codePath = cleanCandidate(code.textContent || '')
         if (codePath) {
           e.preventDefault(); e.stopPropagation(); requestOpenPath(codePath)

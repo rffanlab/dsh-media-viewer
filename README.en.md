@@ -211,6 +211,14 @@ Tests cover:
 
 ## Changelog
 
+### v0.2.8
+
+- Fix DSH inline file mentions being downgraded to basename-only paths, e.g. opening final.mp4 instead of its real .dsh-runs/.../final/final.mp4 location
+- DSH exposes the canonical full path on the inline file mention's button[title]; the viewer now prefers that title
+- Fall back to raw code text only for genuinely bare code paths without a DSH file button
+- Support both code-wrapping-button and button-wrapping-code structures
+
+
 ### v0.2.7
 
 - Fix DSH explicit-delivery cards where the localized accessibility label could be mistaken for a path, e.g. `在侧边栏打开 /.../file.mp4`

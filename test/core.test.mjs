@@ -78,6 +78,15 @@ test('client prefers canonical DSH presented-card title paths', async () => {
   assert.match(client, /在\(\?:右侧\)\?侧边栏/)
 })
 
+test('client prefers canonical title for DSH inline-code file mentions', async () => {
+  const client = await readFixture(new URL('../client.js', import.meta.url), 'utf8')
+  assert.match(client, /var mentionButton = t\.closest\('button\[title\]'\) \|\| code\.querySelector\('button\[title\]'\)/)
+  assert.match(client, /var mentionPath = cleanCandidate\(mentionButton\.getAttribute\('title'\) \|\| ''\)/)
+  const mentionPos = client.indexOf("var mentionPath = cleanCandidate(mentionButton.getAttribute('title') || '')")
+  const basenameFallbackPos = client.indexOf("var codePath = cleanCandidate(code.textContent || '')")
+  assert.ok(mentionPos >= 0 && basenameFallbackPos > mentionPos)
+})
+
 test('runtime document dependencies import on Node 20+', async () => {
   const [pdfjs, mammoth, exceljs, jszip] = await Promise.all([
     import('pdfjs-dist/legacy/build/pdf.mjs'),

@@ -211,6 +211,14 @@ Tests cover:
 
 ## Changelog
 
+### v0.2.9
+
+- Fix question / confirmation choices being hijacked when their ordinary button text mentions `.mp4/.md` filenames
+- Generic click detection no longer guesses paths from control `textContent`, `aria-label`, or tooltips
+- Plain `button` / `role=button` controls enter generic file detection only when they carry an explicit `title` or file `data-*` attribute
+- DSH explicit-delivery cards and inline file mentions keep their dedicated canonical-path handling
+
+
 ### v0.2.8
 
 - Fix DSH inline file mentions being downgraded to basename-only paths, e.g. opening final.mp4 instead of its real .dsh-runs/.../final/final.mp4 location

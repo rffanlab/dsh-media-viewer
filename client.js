@@ -1,4 +1,4 @@
-// dsh-media-viewer: DeepSeek Harness plugin (Client side) v0.2.8
+// dsh-media-viewer: DeepSeek Harness plugin (Client side) v0.2.9
 // Based on the DSH slot/panel integration patterns from dsh-md-preview.
 
 window.__ModuleLoader__.load({
@@ -571,15 +571,14 @@ window.__ModuleLoader__.load({
       if (el.closest && (el.closest('.mv-panel') || el.closest('.mv-page'))) return null
       var values = []
       if (el.getAttribute) {
-        ;['data-path','data-file-path','data-filename','data-file','data-uri','data-url','href','title','aria-label','data-tooltip'].forEach(function (name) {
+        // Only machine-readable file/path attributes participate here.
+        // Never infer a path from generic button copy, aria-labels, or tooltips:
+        // question/approval choices often mention filenames as ordinary prose.
+        ;['data-path','data-file-path','data-filename','data-file','data-uri','data-url','href','title'].forEach(function (name) {
           var v = el.getAttribute(name); if (v) values.push(v)
         })
       }
       if (el.href) values.push(el.href)
-      // Important: inspect ONLY the clicked file element itself.
-      // Do not walk ancestor containers: authorization/confirm buttons can live
-      // inside tool cards whose parent text contains unrelated file paths.
-      if (el.textContent) values.push(el.textContent)
       for (var i = 0; i < values.length; i += 1) {
         var found = cleanCandidate(values[i])
         if (found) return found
@@ -634,9 +633,10 @@ window.__ModuleLoader__.load({
         }
       }
 
-      // Only explicit clickable/file-bearing elements. Do NOT include generic
-      // [tabindex], and do not scan parents above the matched element.
-      var clickable = t.closest('a,button,[role="button"],[data-path],[data-file-path],[data-filename],[data-file],[data-uri],[data-url]')
+      // Only explicit file-bearing elements reach the generic fallback.
+      // Plain buttons / role=button controls are intentionally excluded unless
+      // they carry a canonical title or file data attribute.
+      var clickable = t.closest('a[href],button[title],[role="button"][title],[data-path],[data-file-path],[data-filename],[data-file],[data-uri],[data-url]')
       if (!clickable) return
       var path = pathOfElement(clickable); if (!path) return
       e.preventDefault(); e.stopPropagation(); requestOpenPath(path)

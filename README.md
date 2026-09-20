@@ -213,6 +213,14 @@ npm test
 
 ## 更新记录
 
+### v0.2.9
+
+- 修复问答 / 确认选项按钮正文中出现 `.mp4/.md` 文件名时被媒体查看器误拦截的问题
+- 通用点击识别不再读取普通控件的 `textContent`、`aria-label` 或 tooltip 来猜路径
+- 普通 `button` / `role=button` 只有明确携带 `title` 或文件 `data-*` 属性时才进入通用文件识别
+- DSH 显式交付卡片和正文行内文件提及仍走专门的 canonical-path 逻辑，不受影响
+
+
 ### v0.2.8
 
 - 修复 DSH 正文行内文件提及只把 basename 传给媒体查看器的问题，例如完整文件实际位于 .dsh-runs/.../final/，插件却只收到 final.mp4

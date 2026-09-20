@@ -87,6 +87,19 @@ test('client prefers canonical title for DSH inline-code file mentions', async (
   assert.ok(mentionPos >= 0 && basenameFallbackPos > mentionPos)
 })
 
+test('client never infers files from generic choice button prose', async () => {
+  const client = await readFixture(new URL('../client.js', import.meta.url), 'utf8')
+  const pathFnStart = client.indexOf('function pathOfElement(el)')
+  const clickStart = client.indexOf('function onClickCapture(e)')
+  const pathFn = client.slice(pathFnStart, clickStart)
+  assert.ok(pathFnStart >= 0 && clickStart > pathFnStart)
+  assert.doesNotMatch(pathFn, /textContent/)
+  assert.doesNotMatch(pathFn, /aria-label/)
+  assert.doesNotMatch(pathFn, /data-tooltip/)
+  assert.match(client, /a\[href\],button\[title\],\[role="button"\]\[title\]/)
+  assert.doesNotMatch(client, /closest\('a,button,\[role="button"\]/)
+})
+
 test('runtime document dependencies import on Node 20+', async () => {
   const [pdfjs, mammoth, exceljs, jszip] = await Promise.all([
     import('pdfjs-dist/legacy/build/pdf.mjs'),

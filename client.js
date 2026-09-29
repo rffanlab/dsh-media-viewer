@@ -1,4 +1,4 @@
-// dsh-media-viewer: DeepSeek Harness plugin (Client side) v0.2.9
+// dsh-media-viewer: DeepSeek Harness plugin (Client side) v0.2.10
 // Based on the DSH slot/panel integration patterns from dsh-md-preview.
 
 window.__ModuleLoader__.load({
@@ -536,7 +536,6 @@ window.__ModuleLoader__.load({
     function sanitizePathInput(value) {
       var s = String(value === null || value === undefined ? '' : value).replace(PATH_EDGE_JUNK_RE, '')
       s = s.replace(/([/\\])[ \t\f\v]*\r?\n[ \t\f\v]*/g, '$1')
-      s = s.replace(/[ \t\f\v]*\r?\n[ \t\f\v]*(?=[/\\])/g, '')
       s = s.replace(PATH_FORMAT_JUNK_AFTER_RE, '$1').replace(PATH_FORMAT_JUNK_BEFORE_RE, '')
       s = s.replace(/([/\\])[ \t]+(?=\.dsh-runs(?:[/\\]|$))/g, '$1')
       return s.replace(PATH_EDGE_JUNK_RE, '')
@@ -585,6 +584,36 @@ window.__ModuleLoader__.load({
       }
       return null
     }
+    function codeBlockPathAtPoint(code, e) {
+      if (!code || !code.closest || !code.closest('pre')) return null
+      var node = null
+      var offset = 0
+      try {
+        if (document.caretPositionFromPoint) {
+          var pos = document.caretPositionFromPoint(e.clientX, e.clientY)
+          if (pos) { node = pos.offsetNode; offset = pos.offset }
+        } else if (document.caretRangeFromPoint) {
+          var caret = document.caretRangeFromPoint(e.clientX, e.clientY)
+          if (caret) { node = caret.startContainer; offset = caret.startOffset }
+        }
+      } catch (err) {}
+      if (!node || !code.contains(node)) return null
+      try {
+        var range = document.createRange()
+        range.selectNodeContents(code)
+        range.setEnd(node, offset)
+        var before = range.toString()
+        var all = code.textContent || ''
+        var at = before.length
+        var start = all.lastIndexOf('\n', Math.max(0, at - 1)) + 1
+        var end = all.indexOf('\n', at)
+        if (end < 0) end = all.length
+        return cleanCandidate(all.slice(start, end))
+      } catch (err) {
+        return null
+      }
+    }
+
     function onClickCapture(e) {
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
       var t = e.target; if (!t || typeof t.closest !== 'function') return
@@ -612,10 +641,10 @@ window.__ModuleLoader__.load({
         return
       }
 
-      // DSH inline file mentions render as <code><button title="FULL_PATH">basename</button></code>
-      // (and explicit markdown file links can render as <button title="FULL_PATH"><code>...</code></button>).
-      // Prefer the owner's canonical title path before falling back to the authored code text,
-      // otherwise a unique-basename mention is incorrectly downgraded to just "file.mp4".
+      // DSH inline file mentions render as <code><button title="FULL_PATH">basename</button></code>.
+      // Prefer that canonical title. For fenced/preformatted code blocks, never
+      // treat the whole block as one path; resolve only the physical line under
+      // the pointer so independent paths cannot be glued together.
       var code = t.closest('code')
       if (code) {
         var mentionButton = t.closest('button[title]') || code.querySelector('button[title]')
@@ -625,6 +654,13 @@ window.__ModuleLoader__.load({
             e.preventDefault(); e.stopPropagation(); requestOpenPath(mentionPath)
             return
           }
+        }
+        if (code.closest('pre')) {
+          var blockPath = codeBlockPathAtPoint(code, e)
+          if (blockPath) {
+            e.preventDefault(); e.stopPropagation(); requestOpenPath(blockPath)
+          }
+          return
         }
         var codePath = cleanCandidate(code.textContent || '')
         if (codePath) {
@@ -645,7 +681,7 @@ window.__ModuleLoader__.load({
       var t = e.target; if (!t || typeof t.closest !== 'function') return
       if (t.closest('.mv-panel') || t.closest('.mv-page')) return
       var code = t.closest('code')
-      if (!code) return
+      if (!code || code.closest('pre')) return
       var path = cleanCandidate(code.textContent || '')
       if (!path) return
       try {

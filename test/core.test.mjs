@@ -64,6 +64,7 @@ test('sanitizes chat path artifacts without deleting legitimate spaces', () => {
   const base = '/srv/e5-data/deepseek-harness/workspace/道家文化主号短视频/'
   const tail = '.dsh-runs/762b5b31-a1c9-48ed-994d-6f8abaee69be/final/zhuangzi-01-04-liezi-final-v3.mp4'
   assert.equal(sanitizePathInput(base + '\n  ' + tail), base + tail)
+  assert.equal(sanitizePathInput('/srv/a/production.json\n/srv/b/final.mp4'), '/srv/a/production.json\n/srv/b/final.mp4')
   assert.equal(sanitizePathInput(base + '  ' + tail), base + tail)
   assert.equal(sanitizePathInput('\uFEFF\u200E' + base + tail + '\u200B\u2060'), base + tail)
   assert.equal(sanitizePathInput('/srv/workspace/我的 视频/final version.mp4'), '/srv/workspace/我的 视频/final version.mp4')
@@ -98,6 +99,14 @@ test('client never infers files from generic choice button prose', async () => {
   assert.doesNotMatch(pathFn, /['\"]data-tooltip['\"]/)
   assert.match(client, /a\[href\],button\[title\],\[role="button"\]\[title\]/)
   assert.doesNotMatch(client, /closest\('a,button,\[role="button"\]/)
+})
+
+test('client resolves only the clicked line inside multi-path code blocks', async () => {
+  const client = await readFixture(new URL('../client.js', import.meta.url), 'utf8')
+  assert.match(client, /function codeBlockPathAtPoint\(code, e\)/)
+  assert.match(client, /caretPositionFromPoint|caretRangeFromPoint/)
+  assert.match(client, /if \(code\.closest\('pre'\)\)/)
+  assert.match(client, /var blockPath = codeBlockPathAtPoint\(code, e\)/)
 })
 
 test('runtime document dependencies import on Node 20+', async () => {

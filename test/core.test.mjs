@@ -91,9 +91,9 @@ test('client prefers canonical title for DSH inline-code file mentions', async (
 test('client never infers files from generic choice button prose', async () => {
   const client = await readFixture(new URL('../client.js', import.meta.url), 'utf8')
   const pathFnStart = client.indexOf('function pathOfElement(el)')
-  const clickStart = client.indexOf('function onClickCapture(e)')
-  const pathFn = client.slice(pathFnStart, clickStart)
-  assert.ok(pathFnStart >= 0 && clickStart > pathFnStart)
+  const pathFnEnd = client.indexOf('function codeBlockPathAtPoint(code, e)')
+  const pathFn = client.slice(pathFnStart, pathFnEnd)
+  assert.ok(pathFnStart >= 0 && pathFnEnd > pathFnStart)
   assert.doesNotMatch(pathFn, /textContent/)
   assert.doesNotMatch(pathFn, /['\"]aria-label['\"]/)
   assert.doesNotMatch(pathFn, /['\"]data-tooltip['\"]/)

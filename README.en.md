@@ -211,6 +211,15 @@ Tests cover:
 
 ## Changelog
 
+### v0.2.10
+
+- Fix multi-line code blocks where several absolute paths were concatenated into one giant path after clicking a single line
+- For `<pre><code>` blocks, resolve the physical line under the pointer and use only that line as the candidate path
+- Bare inline `<code>` paths and DSH canonical `button[title]` file mentions keep their existing behavior
+- Tighten newline sanitation: still repair single-path wrapping such as `/\n  .dsh-runs`, but never join independent paths like `file.json\n/srv/other.mp4`
+- Apply the same boundary on both Client and Host
+
+
 ### v0.2.9
 
 - Fix question / confirmation choices being hijacked when their ordinary button text mentions `.mp4/.md` filenames

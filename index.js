@@ -154,7 +154,6 @@ export function sanitizePathInput(value) {
   s = s.replace(edge, '')
   // A rendered/copy-wrapped path may continue on the next visual line.
   s = s.replace(/([/\\])[ \t\f\v]*\r?\n[ \t\f\v]*/g, '$1')
-  s = s.replace(/[ \t\f\v]*\r?\n[ \t\f\v]*(?=[/\\])/g, '')
   // Invisible formatting marks next to separators are never meaningful here.
   const fmtAfter = new RegExp(`([/\\\\])${PATH_FORMAT_JUNK.source}+`, 'g')
   const fmtBefore = new RegExp(`${PATH_FORMAT_JUNK.source}+(?=[/\\\\])`, 'g')

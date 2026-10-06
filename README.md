@@ -4,69 +4,210 @@
 
 [**简体中文**](README.md) | [English](README.en.md)
 
-**DeepSeek Harness 的统一媒体 / 文档查看器**
+**DeepSeek Harness 0.2.x 的音视频增强插件**
 
-视频、音频、图片、Markdown、文本、字幕、PDF、Word、Excel、PowerPoint，直接在 DSH 对话旁边查看。可复制的文档支持一键复制全文，所有已识别文件都可以下载原文件。
+视频 / 音频原生播放、HTTP Range 拖动、倍速、字幕时间轴与原文件下载。
+
+**Markdown、PDF、Word、Excel、PowerPoint、图片、代码和普通文本从 v0.3.0 起全部交给 DSH 官方 Document Preview。**
 
 </div>
 
-## 功能
+## 为什么 v0.3.0 要重构
 
-- **视频播放**：`.mp4 / .webm / .mov / .m4v / .ogv / .mkv`
-  - 原生 `<video controls>`：播放 / 暂停 / 音量 / 全屏 / 拖动进度
-  - 0.5× ~ 2× 倍速
-  - Space/K 播放暂停，J/← 后退 5 秒，L/→ 前进 5 秒
-  - 根据视频真实宽高比自动适配停靠栏 / 浮动窗口，横屏和竖屏都使用 `object-fit: contain`，不会拉伸
-  - Host 支持 HTTP `Range`，大视频无需一次性读入内存，支持拖动进度条
-- **音频播放**：`.mp3 / .wav / .ogg / .m4a / .aac / .flac / .opus`
-  - 播放 / 暂停 / 拖动进度 / 倍速 / 键盘控制
-- **图片查看**：PNG / JPEG / GIF / WebP / AVIF / BMP / ICO / SVG
-- **Markdown 预览**：整合并扩展 `dsh-md-preview` 的 DSH 插槽、右侧停靠和 Markdown 渲染能力
-  - 标题、列表、表格、代码块、引用、链接、图片
-  - Markdown 相对图片路径自动通过媒体端点加载
-- **文本 / 代码预览**：TXT、日志、JSON/YAML/TOML、CSV/XML、常见源码文件等
-- **字幕预览**：SRT / WebVTT / ASS / SSA / LRC，按时间轴分条显示
-- **PDF**：浏览器原生 PDF 预览；可提取文本层、复制全文、下载原文件
-- **DOCX**：提取 Word 正文用于预览和复制；可下载原文件
-- **XLSX**：工作表结构化预览、Sheet 切换、单元格滚动查看；可复制整个工作簿文本
-- **PPTX**：逐页文字结构预览、上一页 / 下一页；可复制整份幻灯片文字
-- **其他 Office 文档**：`.doc / .rtf / .odt / .xls / .ods / .ppt / .odp` 当前提供统一下载入口
-- **统一下载**：所有已识别类型都能下载原文件
-- **会话隔离最近文件**：只显示当前会话访问过的媒体 / 文档
-- **聊天内直接打开**：
-  - 支持文件按钮、链接、文件芯片、常见 `data-*` 文件属性
-  - 支持聊天 Markdown 中的行内代码路径，例如 `/srv/workspace/demo.mp4`
-  - 鼠标移到可识别的 `<code>` 文件路径上，会显示可点击提示
-  - 支持完整路径和只含文件名的相对路径；相对路径按当前会话工作目录解析
-  - 兼容 `file://` / 部分 `vscode://` 路径，但**不要求模型特意输出 `file://`**
-  - 文件拦截只检查实际点击的文件元素本身，不扫描普通 UI 父容器，避免误拦截授权 / 确认 / 取消等 DSH 操作按钮
-  - 按住 Ctrl/Cmd/Shift/Alt 点击时保留 DSH 原始打开行为
-- **右侧停靠 / 浮动**：停靠宽度可拖动并记忆，也可切换浮动窗口
-- **深浅色主题**：UI 使用 DSH 的 `--dsw-alias-*` 设计变量
+早期 DSH 缺少完整文件预览能力，因此本插件曾经自己实现 Markdown、文本、图片、PDF、DOCX、XLSX、PPTX 等预览，并通过全局 DOM 点击拦截识别聊天里的文件路径。
 
-## 支持情况
+DSH 0.2.x 已经提供正式的右侧 Sidebar、Resource 地址和 Document Preview 扩展体系，官方预览已经覆盖：
 
-| 类型 | 预览 | 复制全文 | 下载 |
-| --- | --- | --- | --- |
-| 视频 | ✅ 播放 / 倍速 / 自适应 | — | ✅ |
-| 音频 | ✅ 播放 / 倍速 | — | ✅ |
-| 图片 | ✅ | — | ✅ |
-| Markdown | ✅ 渲染 | ✅ Markdown 源文 | ✅ |
-| TXT / 代码 / JSON / YAML / CSV 等 | ✅ 纯文本 | ✅ | ✅ |
-| SRT / VTT / ASS / SSA / LRC | ✅ 时间轴 | ✅ 原始字幕 | ✅ |
-| PDF | ✅ 浏览器 PDF | ✅ 提取文本层 | ✅ |
-| DOCX | ✅ 提取正文 | ✅ 提取正文 | ✅ |
-| XLSX | ✅ 工作表 / 单元格 | ✅ 整个工作簿文本 | ✅ |
-| PPTX | ✅ 逐页文字结构 | ✅ 整份幻灯片文字 | ✅ |
-| DOC / XLS / PPT / ODT / ODS / ODP | 暂不内嵌 | 暂不提取 | ✅ |
+- Markdown / 代码 / 纯文本
+- 图片
+- PDF
+- HTML
+- Word / PowerPoint
+- Excel / CSV / TSV
 
-> PDF 的“复制全文”依赖 PDF 自带文本层。扫描件如果没有 OCR 文本层，提取结果可能为空；插件目前不会自动做 OCR。
+继续重复维护这些功能没有意义，而且全局 DOM 点击猜路径也是旧版大量兼容问题的主要来源。
 
-> PPTX 当前是**文字结构预览**，不会假装精确还原字体、图片、动画和原始版式。需要检查视觉排版时请下载 / 打开原文件。
+因此 v0.3.0 改成：
+
+> **官方 DSH 管文件和文档，我们只做官方暂时没有做完整的媒体能力。**
+
+## v0.3.0 能力
+
+### 视频
+
+支持：
+
+- MP4
+- WebM
+- MOV
+- M4V
+- OGV
+- MKV
+
+功能：
+
+- 播放 / 暂停
+- 浏览器原生进度条
+- HTTP Byte Range / 206 Partial Content
+- 任意 seek
+- 0.5× ～ 2× 倍速
+- 横屏 / 竖屏自适应，`object-fit: contain`
+- Space / K：播放暂停
+- J / ←：后退 5 秒
+- L / →：前进 5 秒
+- 下载原文件
+
+> MKV / MOV 等是否可以直接播放仍取决于浏览器自身编解码支持。
+
+### 音频
+
+支持：
+
+- MP3
+- WAV
+- OGG / OGA
+- M4A
+- AAC
+- FLAC
+- OPUS
+
+同样支持 Range、seek、倍速和下载。
+
+### 字幕
+
+支持：
+
+- SRT
+- WebVTT
+- ASS
+- SSA
+- LRC
+
+字幕直接作为 DSH Document Preview 的扩展 renderer：
+
+- 时间轴展示
+- 复制全文
+- 下载原文件
+- 超长字幕预览最多展示前 5000 条，复制全文不受此限制
+
+## 新架构
+
+v0.3.0 不再创建自己的“平行 Sidebar”。
+
+文件打开链路变成：
+
+```text
+聊天文件 / Files 树 / 工具产物
+            ↓
+      DSH Resource
+            ↓
+    官方 Right Sidebar
+            ↓
+  官方 Document Preview
+       ↓           ↓
+普通文档 renderer   dsh-media-viewer
+                    ├─ Video
+                    ├─ Audio
+                    └─ Subtitle
+```
+
+### Client
+
+插件通过 DSH 官方扩展接口注册：
+
+```text
+ctx.documentPreviews.register(...)
+sidebar.right.tab.document
+```
+
+媒体 renderer 使用：
+
+```text
+loading: renderer
+priority: extension
+```
+
+因此视频不会经过官方 `readBytes` 整文件读取，而是直接使用本插件的 Range Streaming。
+
+字幕使用：
+
+```text
+loading: text-pages
+priority: extension
+```
+
+文本读取、自动刷新、Session 生命周期全部由 DSH 官方负责。
+
+### Host
+
+Host 现在只保留两个接口：
+
+- `/media-viewer/api/meta`
+- `/media-viewer/api/content`
+
+`content` 支持：
+
+- GET
+- HEAD
+- `Range: bytes=...`
+- `206 Partial Content`
+- 原文件下载
+
+所有媒体请求都必须带当前 DSH Session ID。
+
+## v0.3.0 删除了什么
+
+以下能力不再由本插件实现：
+
+| 类型 | v0.2.x | v0.3.0 |
+| --- | --- | --- |
+| Markdown | 插件自己渲染 | DSH 官方 |
+| 代码 / TXT | 插件自己渲染 | DSH 官方 |
+| 图片 | 插件自己预览 | DSH 官方 |
+| PDF | PDF.js | DSH 官方 |
+| DOC / DOCX | Mammoth / 下载 | DSH 官方 Office Preview |
+| XLS / XLSX | ExcelJS 简易表格 | DSH 官方 Excel Preview |
+| PPT / PPTX | JSZip 文字提取 | DSH 官方 Office Preview |
+| HTML | 文本 | DSH 官方沙箱 Preview |
+| 聊天文件点击 | 全局 DOM 拦截 | DSH Resource / Sidebar |
+
+因此 v0.3.0 删除了这些运行时依赖：
+
+- `mammoth`
+- `pdfjs-dist`
+- `exceljs`
+- `jszip`
+
+插件安装明显更轻。
+
+## 最重要的变化：不再全局抢 click
+
+v0.2.x 为了兼容不同版本 DSH，曾经需要：
+
+```js
+document.addEventListener('click', ..., true)
+```
+
+再从：
+
+- `title`
+- `aria-label`
+- `data-*`
+- `<code>`
+- 文件卡片
+- 文本内容
+
+猜用户到底点了哪个文件。
+
+这也是后来授权按钮、问题选项、多路径代码块等兼容问题的根源。
+
+**v0.3.0 已完全移除这套全局点击拦截。**
+
+文件身份和 Session 归属现在由 DSH 官方 Resource 模型负责。
 
 ## 安装
 
-推荐使用 DSH 原生插件命令：
+v0.3.0 面向 **DeepSeek Harness 0.2.x**。
 
 ```bash
 dsh plugin --profile web add github:rffanlab/dsh-media-viewer
@@ -78,122 +219,50 @@ Windows：
 dsh.ps1 plugin --profile web add github:rffanlab/dsh-media-viewer
 ```
 
-仓库已经包含 `dsh.bundle` manifest 和 `cordis.patch.yml`：
+然后重启 `dsh web` 并刷新浏览器。
 
-```yaml
-- insert:
-    - id: media-viewer
-      name: 'dsh-media-viewer'
-```
-
-然后重启 `dsh web` 并刷新页面。
-
-### 更新已有安装
-
-按当前 DSH 插件安装方式更新即可。GitHub 源安装通常可以先 remove 后重新 add；本地 clone 则执行 `git pull` 后重新安装依赖。更新后建议重启 `dsh web`。
-
-### 本地开发安装
-
-```bash
-git clone https://github.com/rffanlab/dsh-media-viewer.git
-cd dsh-media-viewer
-npm install
-npm test
-npm run check
-```
-
-在 web profile 中引用本地目录：
-
-```bash
-cd ~/.dsh/profiles/web
-npm pkg set "dependencies.dsh-media-viewer=file:~/plugins/dsh-media-viewer"
-npm install
-```
-
-如果 profile 使用 pnpm，`file:` 依赖可能会被快照复制到 `.pnpm`。修改插件源码后需要重新 `pnpm install`，或同步快照后再刷新 DSH。
+如果已经安装旧版插件，请正常更新插件后重启 DSH。
 
 ## 使用
 
-1. 点击会话头部 **“媒体查看”** 打开统一查看器；
-2. 直接点击聊天里的文件按钮、文件芯片、链接或灰底行内代码路径，也会自动在右侧打开；
-3. 视频 / 音频直接播放，工具栏可选 0.5× ~ 2× 倍速；
-4. Markdown / 文本 / 字幕 / PDF / DOCX / XLSX / PPTX 可点击 **“复制全文”**；
-5. XLSX 在上方切换工作表；PPTX 用上一页 / 下一页逐页查看；
-6. 任意已支持文件点击 **“下载”** 获取原文件；
-7. 右侧栏左边缘可拖动调整宽度，点 **“浮动”** 可切换窗口模式。
+不再需要单独点击“媒体查看”按钮。
 
-例如模型直接输出：
+直接使用 DSH 自己的文件入口：
 
-```text
-/srv/e5-data/deepseek-harness/workspace/project/final.mp4
-```
+- 聊天中的文件引用
+- 工具输出文件
+- 交付文件
+- Files 文件树
 
-只要该路径在聊天中渲染成行内代码并且扩展名受支持，插件即可把它识别为可打开文件。无需改写成 HTML，也无需强制写成 `file://`。
+打开视频、音频或字幕时，官方 Document Preview 会自动选择本插件提供的 renderer。
 
-## 架构
+其他文档继续使用 DSH 官方 renderer。
 
-### Host：`index.js`
+## 与 DSH 官方预览的边界
 
-- 监听 `fs/observed`，维护会话隔离的最近文件记录
-- `/media-viewer/api/recent`：最近媒体 / 文档
-- `/media-viewer/api/meta`：文件类型、大小、MIME、能力信息
-- `/media-viewer/api/text`：Markdown / 文本 / 字幕 / PDF / DOCX / XLSX / PPTX 全文提取
-- `/media-viewer/api/structured`：XLSX / PPTX 结构化预览数据
-- `/media-viewer/api/peek`：列表摘要
-- `/media-viewer/api/content`：二进制流与下载；支持 `HEAD` 和 HTTP Byte Range
+### DSH 官方负责
 
-音视频使用 `createReadStream()` 流式输出。带 Range 请求时返回 `206 Partial Content`，用于媒体 seek。
+- Resource 地址
+- Session 文件归属
+- Right Sidebar
+- tab 生命周期
+- Markdown / Code / Text
+- Image
+- PDF
+- HTML
+- Office
+- Excel
+- 文件自动刷新
 
-XLSX 使用 ExcelJS 解析；PPTX 本质是 ZIP + XML，使用 JSZip 读取 `ppt/slides/slideN.xml` 并抽取文字结构，不执行 Office 文档中的宏或脚本。
+### dsh-media-viewer 负责
 
-### Client：`client.js`
-
-- 使用 `conversation.session.header.actions` 注册入口
-- 使用 `shell.overlay` 注册右侧 / 浮动查看器
-- 使用 `conversation.view` 注册“媒体查看”页签
-- 捕获聊天中的文件按钮、链接、文件芯片和 `<code>` 文件路径并改为内部预览
-- 文件点击采用局部识别：只从实际匹配的元素读取路径属性 / 文本，不沿父容器继续搜索
-- Markdown 渲染逻辑由 `dsh-md-preview` 的实现思路扩展而来
-- XLSX：工作表 tabs + 可滚动表格
-- PPTX：逐页文字结构卡片
-- 字幕：时间轴卡片
-- 音视频：原生媒体 controls + 倍速 / 快捷键 / 自适应比例
-
-## 依赖
-
-- `mammoth`：DOCX 正文提取
-- `pdfjs-dist@4.10.38`：PDF 文本层提取
-- `exceljs@4.4.0`：XLSX 读取
-- `jszip@3.10.1`：PPTX ZIP/XML 读取
-
-PDF.js 固定在 4.10.38，主要为了保持 DSH 当前 Node 20 系列环境兼容。
-
-## 安全与限制
-
-- 文本 / 字幕直接预览与复制上限：8 MB
-- PDF / DOCX / XLSX / PPTX 解析文件上限：64 MB
-- 提取后的全文最多约 8 MB，超过会截断
-- XLSX UI 每个工作表最多预览前 250 行、80 列；“复制全文”走单独的全文提取逻辑
-- PPTX 结构化预览最多读取前 200 页
-- 不执行文档中的脚本、宏或嵌入代码；HTML / 源码文件按纯文本显示
-- PDF 预览使用浏览器自带 PDF Viewer
-- MKV / MOV / FLAC 等能否直接播放取决于浏览器编解码支持；服务端 Range / 下载能力不受影响
-- 插件面向 DSH 本地工作目录文件；文件解析失败时仍保留下载能力
-
-## 与 dsh-md-preview 的关系
-
-`dsh-media-viewer` 是对 `dsh-md-preview` 的统一化扩展，而不是旁边再装一套互相抢点击事件的预览器。它复用 / 改写了后者的：
-
-- DSH Host / Client 分层方式
-- session-scoped recent-files 思路
-- shell overlay / conversation view 插槽接入
-- 对话文件引用点击拦截
-- 右侧停靠布局
-- Markdown 渲染和相对图片处理
-
-建议安装 `dsh-media-viewer` 后停用 `dsh-md-preview`，避免两者同时拦截 `.md` 点击。
-
-原始 MIT 版权信息见 [LICENSE](LICENSE) 和 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+- Video Player
+- Audio Player
+- Subtitle Timeline
+- HTTP Range Streaming
+- Seek
+- Playback Rate
+- Media Download
 
 ## 开发检查
 
@@ -205,89 +274,28 @@ npm test
 
 测试覆盖：
 
-- 文件类型分类（含字幕 / XLSX / PPTX）
-- MIME 映射
-- HTTP Range 解析（含 suffix range）
-- PPTX XML entity / 文本 run 提取
-- PDF.js / Mammoth / ExcelJS / JSZip 的 Node 20 runtime import
+- 媒体类型分类
+- MIME
+- HTTP Range
+- 路径污染清理
+- 不连接两个独立绝对路径
+- DSH Document Preview extension 注册
+- 确认已经删除全局 click 拦截
+- 确认插件不再认领 PDF / Office / Excel / Markdown / 图片
+- 确认运行时无文档解析依赖
 
-## 更新记录
+## 升级记录
 
-### v0.2.10
+### v0.3.0
 
-- 修复多行代码块列出多个绝对路径时，点击其中一条会把整块路径拼成一条超长路径的问题
-- 对 `<pre><code>` 多行代码块按鼠标实际点击位置定位当前行，只把该行作为候选文件路径
-- 裸行内 `<code>` 与 DSH canonical `button[title]` 文件引用保持原有行为
-- 收紧换行清洗：继续兼容 `/\n  .dsh-runs` 这类单路径折行，但不再把 `file.json\n/srv/other.mp4` 两个独立绝对路径连接起来
-- Host 与 Client 同步采用新的换行边界
-
-
-### v0.2.9
-
-- 修复问答 / 确认选项按钮正文中出现 `.mp4/.md` 文件名时被媒体查看器误拦截的问题
-- 通用点击识别不再读取普通控件的 `textContent`、`aria-label` 或 tooltip 来猜路径
-- 普通 `button` / `role=button` 只有明确携带 `title` 或文件 `data-*` 属性时才进入通用文件识别
-- DSH 显式交付卡片和正文行内文件提及仍走专门的 canonical-path 逻辑，不受影响
-
-
-### v0.2.8
-
-- 修复 DSH 正文行内文件提及只把 basename 传给媒体查看器的问题，例如完整文件实际位于 .dsh-runs/.../final/，插件却只收到 final.mp4
-- DSH 行内文件提及的 canonical 完整路径由内部 button[title] 提供；插件现在优先读取该 title
-- 仅当 code 是真正的裸代码路径、没有 DSH 文件按钮时，才退回使用 code 文本本身
-- 同时兼容 code 包 button 与 button 包 code 两种结构
-
-
-### v0.2.7
-
-- 修复 DSH 新版显式交付卡片点击“打开”后路径被错误识别为 `在侧边栏打开 /.../file.mp4` 的问题
-- 针对官方 `[data-presented-file]` 卡片直接读取 `resolveWorkspacePath(cwd, file.path)` 写入的 canonical `title` 路径
-- 卡片正文和“打开”按钮由媒体查看器接管；右侧下拉菜单 (`aria-haspopup=menu`) 保持 DSH 原生行为
-- 防御性兼容中文 `在侧边栏打开 ...` aria-label，不再把界面提示语当作文件路径的一部分
-
-
-### v0.2.6
-
-- 兼容聊天/复制路径中混入的首尾不可见 Unicode 字符（零宽空格、BOM、方向控制符等）
-- 兼容长路径在聊天中换行后产生的 `/\n  子目录` 缩进污染
-- 针对 DSH 生成目录兼容 `/  .dsh-runs`，自动还原为 `/.dsh-runs`
-- 不会全局删除正常文件名空格，例如 `我的 视频/final version.mp4` 保持原样
-- 前端点击提取与 Host 路径解析双层清洗，手动粘贴路径也生效
-
-
-### v0.2.5
-
-- 修复 DSH 会话文件卡片使用“项目名/文件名”相对路径时可能提示 `file not found` 的问题
-- 相对路径仍优先按当前 session cwd 解析；只有当目标不存在且路径首段等于当前 cwd 目录名时，才安全回退到 cwd 的父目录
-- 兼容 `narration.md` 与 `mini-m3-sop-test/narration.md` 两种路径形式，避免重复拼接项目目录名
-
-
-### v0.2.3
-
-- 修复严重回归：授权 / 确认等操作按钮所在的工具卡片如果同时包含文件路径，旧逻辑可能把操作按钮误判为文件入口
-- 文件拦截现在只检查实际匹配的点击元素，不再向上扫描任意祖先容器文本
-- 移除通用 `[tabindex]` 拦截，避免误捕获 DSH 自身控件
-- 聊天 `<code>` 完整文件路径仍然可以直接点击打开
-
-### v0.2.2
-
-- 支持直接点击聊天 Markdown 中的行内代码文件路径，例如 `/srv/.../final.mp4`
-- `<code>` 文件路径悬停时增加可点击样式和提示
-- 不再需要让模型特意把本地文件输出为 `file://...`
-
-### v0.2.1
-
-- 视频按原始宽高比自动适配右侧停靠栏和浮动窗口，横屏 / 竖屏不拉伸
-- 聊天文件点击识别扩展到 `button`、`a`、`role=button` 和常见 `data-*` 文件属性
-- 支持只显示文件名的相对路径，例如 `demo.mp4`
-
-### v0.2.0
-
-- 新增 XLSX 结构化预览和全文复制
-- 新增 PPTX 逐页文字结构预览和全文复制
-- 新增 SRT / VTT / ASS / SSA / LRC 字幕预览
-- 新增音视频倍速和快捷键
-- 新增 `/media-viewer/api/structured`
+- 重构为 DSH 0.2.x 官方 Document Preview extension
+- 删除独立媒体/文档 Sidebar
+- 删除全局 DOM 文件点击拦截
+- 删除 Markdown / PDF / Office / Excel / 图片 / 代码 / 文本重复预览
+- 删除 Mammoth / PDF.js / ExcelJS / JSZip 运行时依赖
+- 视频 / 音频保留独立 HTTP Range Streaming
+- 字幕迁移到官方 `text-pages` renderer
+- 媒体文件身份和 Session 生命周期交给 DSH Resource 模型
 
 ## License
 
